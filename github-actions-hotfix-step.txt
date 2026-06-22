@@ -1,0 +1,16 @@
+ضع هذا الستب قبل dotnet build مباشرة داخل workflow validate كحل مؤقت داخل GitHub Actions:
+
+- name: Hotfix WPF ambiguous references
+  shell: pwsh
+  run: |
+    $p = "src/DawishContentStudio.Manager/MainWindow.xaml.cs"
+    $c = Get-Content $p -Raw
+    $c = $c -replace "`r`n", "`n"
+    if ($c -notmatch '#pragma\s+warning\s+disable\s+CS1998') { $c = "#pragma warning disable CS1998`n" + $c }
+    $c = [regex]::Replace($c, '(?<![\w.])new\s+OpenFileDialog\s*(?=[({])', 'new Microsoft.Win32.OpenFileDialog')
+    $c = [regex]::Replace($c, '(?<![\w.])OpenFileDialog(\s*\??\s+[A-Za-z_][A-Za-z0-9_]*\s*=)', 'Microsoft.Win32.OpenFileDialog$1')
+    $c = [regex]::Replace($c, '(?<![\w.])MessageBox\.Show\s*\(', 'System.Windows.MessageBox.Show(')
+    $c = $c -replace 'Microsoft\.Win32\.Microsoft\.Win32\.OpenFileDialog', 'Microsoft.Win32.OpenFileDialog'
+    $c = $c -replace 'System\.Windows\.System\.Windows\.MessageBox', 'System.Windows.MessageBox'
+    $c = $c -replace "`n", "`r`n"
+    Set-Content -Path $p -Value $c -NoNewline -Encoding UTF8
