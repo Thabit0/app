@@ -17,5 +17,6 @@ public sealed class MedicalClaimsGuardTests
     {
         var guard = new MedicalClaimsGuard();
         Assert.True(guard.IsSafe("اختيار مميز من الدويش، متوفر الآن للطلب من الموقع."));
+        Assert.True(guard.IsSafe("مناسب للمناسبات والضيافة من عطارة الدويش."));
     }
 }

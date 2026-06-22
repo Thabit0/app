@@ -3,104 +3,74 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <Color x:Key="BgColor">#F7F1E8</Color>
-        <Color x:Key="PanelColor">#FFFDF8</Color>
-        <Color x:Key="InkColor">#18231C</Color>
-        <Color x:Key="MutedColor">#7B7368</Color>
-        <Color x:Key="BorderColor">#E2D6C3</Color>
-        <Color x:Key="AccentColor">#3F7664</Color>
-        <Color x:Key="AccentDarkColor">#17271D</Color>
-        <Color x:Key="GoldColor">#D7B673</Color>
-        <SolidColorBrush x:Key="DawishBg" Color="{StaticResource BgColor}"/>
-        <SolidColorBrush x:Key="DawishPanel" Color="{StaticResource PanelColor}"/>
-        <SolidColorBrush x:Key="DawishInk" Color="{StaticResource InkColor}"/>
-        <SolidColorBrush x:Key="DawishMuted" Color="{StaticResource MutedColor}"/>
-        <SolidColorBrush x:Key="DawishBorder" Color="{StaticResource BorderColor}"/>
-        <SolidColorBrush x:Key="DawishAccent" Color="{StaticResource AccentColor}"/>
-        <SolidColorBrush x:Key="DawishAccentDark" Color="{StaticResource AccentDarkColor}"/>
-        <SolidColorBrush x:Key="DawishGold" Color="{StaticResource GoldColor}"/>
-        <SolidColorBrush x:Key="DawishBrown" Color="#3D2617"/>
-
-        <Style TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource DawishInk}"/>
-            <Setter Property="FontFamily" Value="Segoe UI"/>
-        </Style>
-
-        <Style x:Key="BaseButtonStyle" TargetType="Button">
+        <SolidColorBrush x:Key="Bg" Color="#F7F1E6"/>
+        <SolidColorBrush x:Key="Panel" Color="#FFFCF6"/>
+        <SolidColorBrush x:Key="Dark" Color="#17281F"/>
+        <SolidColorBrush x:Key="Green" Color="#477D68"/>
+        <SolidColorBrush x:Key="Gold" Color="#F0D79E"/>
+        <SolidColorBrush x:Key="Border" Color="#E0D0B1"/>
+        <SolidColorBrush x:Key="Muted" Color="#746D62"/>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="6"/>
             <Setter Property="Padding" Value="14,9"/>
-            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="{StaticResource DawishInk}"/>
-            <Setter Property="Background" Value="#F9F3E9"/>
-            <Setter Property="BorderBrush" Value="{StaticResource DawishBorder}"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+            <Setter Property="Background" Value="#FFF8EA"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="16" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
-
-        <Style TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}"/>
-
-        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource DawishAccent}"/>
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{StaticResource Green}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource DawishAccent}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Green}"/>
         </Style>
-
-        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
-            <Setter Property="Background" Value="#C95743"/>
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#B94B3C"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#C95743"/>
+            <Setter Property="BorderBrush" Value="#B94B3C"/>
         </Style>
-
-        <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
-            <Setter Property="Height" Value="48"/>
-            <Setter Property="HorizontalContentAlignment" Value="Right"/>
-            <Setter Property="Background" Value="#253428"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#253428"/>
-            <Setter Property="Margin" Value="0,5"/>
-        </Style>
-
         <Style TargetType="TextBox">
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="BorderBrush" Value="{StaticResource DawishBorder}"/>
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Margin" Value="0,4,0,9"/>
+            <Setter Property="Padding" Value="8"/>
             <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
         </Style>
-
+        <Style TargetType="PasswordBox">
+            <Setter Property="Margin" Value="0,4,0,9"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+        </Style>
         <Style TargetType="ComboBox">
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="BorderBrush" Value="{StaticResource DawishBorder}"/>
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Margin" Value="0,4,0,9"/>
+            <Setter Property="Padding" Value="6"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
-
-        <Style TargetType="ListBox">
-            <Setter Property="BorderBrush" Value="{StaticResource DawishBorder}"/>
-            <Setter Property="Background" Value="#FFFDF8"/>
-            <Setter Property="Padding" Value="8"/>
+        <Style TargetType="DatePicker">
+            <Setter Property="Margin" Value="0,4,0,9"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="FontSize" Value="14"/>
         </Style>
-
         <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource DawishPanel}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource DawishBorder}"/>
+            <Setter Property="Background" Value="{StaticResource Panel}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="22"/>
+            <Setter Property="CornerRadius" Value="24"/>
             <Setter Property="Padding" Value="18"/>
             <Setter Property="Margin" Value="8"/>
         </Style>
-
-        <Style x:Key="MiniCard" TargetType="Border" BasedOn="{StaticResource Card}">
-            <Setter Property="MinHeight" Value="112"/>
+        <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            <Setter Property="Background" Value="#24392D"/>
+            <Setter Property="Foreground" Value="#F6F0E5"/>
+            <Setter Property="BorderBrush" Value="#24392D"/>
+            <Setter Property="Margin" Value="0,6"/>
+            <Setter Property="Padding" Value="18,13"/>
+        </Style>
+        <Style x:Key="SmallLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
         </Style>
     </Application.Resources>
 </Application>

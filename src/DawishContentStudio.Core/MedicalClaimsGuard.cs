@@ -36,11 +36,8 @@ public sealed class MedicalClaimsGuard
                 }
             }
 
-            if (Regex.IsMatch(normalized, @"(مفيد|ينفع|يستخدم|مناسب)\s+(ل|لل|مع)", RegexOptions.IgnoreCase))
-                hits.Add("صيغة فائدة/استخدام علاجي");
-
-            if (Regex.IsMatch(normalized, @"(يساعد|يخفف|يقلل|يحسن)\s+", RegexOptions.IgnoreCase))
-                hits.Add("صيغة تأثير صحي/علاجي");
+            // لا نمنع عبارات تسويقية آمنة مثل "مناسب للمناسبات".
+            // المنع يتم عند وجود كلمة/ادعاء طبي محدد من القوائم أعلاه.
         }
 
         return hits.Distinct().ToArray();
@@ -57,8 +54,7 @@ public sealed class MedicalClaimsGuard
         foreach (var word in ArabicBlocked.Concat(EnglishBlocked))
             result = RemoveBlockedTerm(result, word);
 
-        result = Regex.Replace(result, @"(مفيد|ينفع|يستخدم|مناسب)\s+(ل|لل|مع)\s+\S+", "اختيار مميز", RegexOptions.IgnoreCase);
-        result = Regex.Replace(result, @"(يساعد|يخفف|يقلل|يحسن)\s+\S+", "يضيف لمسة مميزة", RegexOptions.IgnoreCase);
+        // لا نعيد صياغة عبارات عامة آمنة؛ نزيل الكلمات الطبية فقط.
         result = Regex.Replace(result, @"\s+", " ").Trim();
 
         if (result.Length < 20)
