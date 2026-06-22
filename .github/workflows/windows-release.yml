@@ -1,0 +1,51 @@
+name: Windows Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore DawishContentStudio.sln
+
+      - name: Build
+        run: dotnet build DawishContentStudio.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test DawishContentStudio.sln --configuration Release --no-build
+
+      - name: Publish Manager
+        run: dotnet publish src/DawishContentStudio.Manager/DawishContentStudio.Manager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/Manager
+
+      - name: Publish Agent
+        run: dotnet publish src/DawishContentStudio.Agent/DawishContentStudio.Agent.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/Agent
+
+      - name: Copy docs and scripts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path publish/docs | Out-Null
+          New-Item -ItemType Directory -Force -Path publish/scripts | Out-Null
+          Copy-Item README.md publish/README.md -Force
+          Copy-Item docs/*.md publish/docs/ -Force
+          Copy-Item scripts/*.ps1 publish/scripts/ -Force
+
+      - name: Zip release
+        shell: pwsh
+        run: Compress-Archive -Path publish/* -DestinationPath DawishContentStudio-Windows-NoApi.zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DawishContentStudio-Windows-NoApi
+          path: DawishContentStudio-Windows-NoApi.zip
