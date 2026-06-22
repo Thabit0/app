@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>DawishContentStudio.Manager</AssemblyName>
+    <AssemblyName>DawishContentStudio</AssemblyName>
     <RootNamespace>DawishContentStudio.Manager</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

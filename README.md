@@ -1,69 +1,48 @@
-# Dawish Content Studio Windows No API v0.4.3
+# Dawish Content Studio Windows No API v0.7 UI/UX Reset
 
-إصلاح بناء GitHub Actions: تم تحديد أحداث WPF بشكل صريح مثل `WpfControls.SelectionChangedEventArgs` لتفادي تعارض Windows Forms/WPF.
-
-# Dawish Content Studio Windows — No API v0.4.3
-
-برنامج ويندوز Native لإدارة محتوى الدويش بين جهازين بدون API.
+برنامج ويندوز واحد يعمل على لابتوبك وجهاز المحل، بدون API وبدون Android وبدون Electron.
 
 ## الفكرة
 
-- لابتوبك: **Manager** لتجهيز الصور والكابشن والجدولة.
-- جهاز المحل: **Publisher Agent** يراقب مجلد المزامنة وينفذ المنشورات عند وقتها.
-- الربط بين الجهازين: مجلد عادي داخل OneDrive / Google Drive / Syncthing / شبكة محلية.
-- لا يوجد Instagram API ولا TikTok API ولا Snapchat API.
+- على لابتوبك: جهّز الصور والكابشنات والجدولة والتعديل الجماعي.
+- على جهاز المحل: افتح نفس البرنامج وشغّل محطة النشر.
+- الربط بين الجهازين يتم عبر مجلد مزامنة مثل OneDrive أو Google Drive أو Syncthing.
+- كل شيء يتم عبر ملفات داخل DawishSync، بدون API نهائيًا.
 
-## أهم ما في v0.4.3
+## الجديد في v0.7
 
-- Publisher Agent فعلي أكثر.
-- صفحة Publish Assistant لكل منشور.
-- فتح المنصات تلقائيًا من جهاز المحل.
-- نسخ كابشن Instagram للحافظة.
-- TikTok صورة فقط افتراضيًا وبدون صوت.
+- UI/UX Reset: واجهة أنظف وأقرب للوحة نظام حقيقية.
+- صفحة أول تشغيل داخل البرنامج.
+- Dashboard أوضح فيه خطوات البداية، جهاز الإدارة، وجهاز المحل.
+- شريط جانبي ثابت فيه كل الصفحات الأساسية.
+- نفس البرنامج على الجهازين مع وضعين: جهاز الإدارة / جهاز المحل.
+- معاينة Instagram / TikTok / Snapchat بتصميم أوضح.
+- إبراز قواعد TikTok و Snapchat داخل الواجهة.
+- إصلاح C# string literals الخاصة بسطر TikTok بدون صوت.
+
+## القواعد الثابتة
+
+- بدون API نهائيًا.
+- TikTok صورة فقط افتراضيًا.
+- TikTok بدون صوت وبدون أغاني.
 - Snapchat صورة فقط.
-- منع Sleep أثناء تشغيل Agent.
-- `AWAITING_CONFIRMATION.flag` بدل تعليم المنشور Done مباشرة.
-- أوامر `--mark-done` و `--mark-failed`.
-- تعديل جماعي موجود: كل صورة تنزل كمنشور مستقل.
-- مراقبة جهاز المحل عبر heartbeat/status.
+- منع الكلام الطبي أو العلاجي.
+- كل صورة في التعديل الجماعي تتحول إلى منشور مستقل.
 
-## تشغيل Agent على جهاز المحل
+## GitHub Actions
 
-```powershell
-DawishContentStudio.Agent.exe --sync "C:\Users\User\OneDrive\DawishSync" --init-settings
-DawishContentStudio.Agent.exe --sync "C:\Users\User\OneDrive\DawishSync" --readiness
-DawishContentStudio.Agent.exe --sync "C:\Users\User\OneDrive\DawishSync" --loop --interval 30
-```
+بعد رفع المشروع إلى GitHub، يشغّل Workflow البناء تلقائيًا ويخرج Artifact باسم:
 
-بعد ما تنشر فعليًا من المتصفح، علم المنشور تم:
+`DawishContentStudio-OneApp-NoApi`
 
-```powershell
-DawishContentStudio.Agent.exe --sync "C:\Users\User\OneDrive\DawishSync" --mark-done job_id
-```
+داخله ملف البرنامج الواحد.
 
-أو من شاشة Manager: اختر حالة المنشور ثم اضغط **تعليم المحدد تم**.
+## طريقة الاستخدام المختصرة
 
-## بناء GitHub Actions
-
-ارفع المشروع إلى GitHub ثم شغل Workflow:
-
-- Validate
-- Windows Release
-
-سيطلع لك Manager وAgent كملفات Windows.
-
-
-## v0.4.3 Build Fix
-
-تم إصلاح تعارض أسماء WPF/Windows Forms في ملفات Manager:
-- `App.xaml.cs`: استخدام `System.Windows.Application` صراحة.
-- `MainWindow.xaml.cs`: استخدام alias لعناصر WPF Controls.
-
-هذا يعالج أخطاء GitHub Actions:
-- `Application is an ambiguous reference`
-- `ComboBox is an ambiguous reference`
-
-
-## v0.4.4
-
-Fixes release tests by making the medical-claims guard avoid false positives on safe words such as `الموقع` while keeping strict blocking for real medical claims.
+1. افتح البرنامج على لابتوبك.
+2. اختر مجلد `DawishSync` داخل OneDrive أو Drive.
+3. أنشئ منشور أو عدّل مجموعة صور.
+4. اعتمد المنشورات.
+5. افتح نفس البرنامج في جهاز المحل.
+6. اختر نفس مجلد المزامنة.
+7. ادخل صفحة جهاز المحل وشغل محطة النشر.

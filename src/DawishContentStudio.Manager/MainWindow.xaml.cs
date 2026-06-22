@@ -14,6 +14,8 @@ public partial class MainWindow : Window
     private string? _selectedImage;
     private readonly List<string> _bulkImages = [];
     private IReadOnlyList<PostJob> _bulkPreviewJobs = [];
+    private CancellationTokenSource? _localPublisherCts;
+    private Task? _localPublisherTask;
 
     public MainWindow()
     {
@@ -22,6 +24,13 @@ public partial class MainWindow : Window
         ScheduleDatePicker.SelectedDate = DateTime.Today;
         BulkStartDatePicker.SelectedDate = DateTime.Today;
         RefreshJobs();
+        UpdateDeviceModeBadge();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _localPublisherCts?.Cancel();
+        base.OnClosed(e);
     }
 
     private void ChooseFolder_Click(object sender, RoutedEventArgs e)
@@ -196,6 +205,9 @@ public partial class MainWindow : Window
         CaptionVariantsListBox.Items.Add("رسمي: " + variants.Formal);
         CaptionVariantsListBox.Items.Add("مختصر: " + variants.Short);
         CaptionVariantsListBox.Items.Add("تسويقي: " + variants.Marketing);
+        InstagramPreviewCaptionText.Text = variants.Formal;
+        TikTokPreviewCaptionText.Text = variants.Short + "\nبدون صوت — بدون أغاني";
+        SnapchatPreviewCaptionText.Text = variants.Short;
     }
 
     private void CaptionVariantsListBox_SelectionChanged(object sender, WpfControls.SelectionChangedEventArgs e)
@@ -205,6 +217,9 @@ public partial class MainWindow : Window
             var idx = text.IndexOf(':');
             CaptionTextBox.Text = idx >= 0 ? text[(idx + 1)..].Trim() : text;
             PreviewCaptionText.Text = CaptionTextBox.Text;
+            InstagramPreviewCaptionText.Text = CaptionTextBox.Text;
+            TikTokPreviewCaptionText.Text = CaptionTextBox.Text + "\nبدون صوت — بدون أغاني";
+            SnapchatPreviewCaptionText.Text = CaptionTextBox.Text.Length > 80 ? CaptionTextBox.Text[..80] : CaptionTextBox.Text;
         }
     }
 
@@ -213,6 +228,109 @@ public partial class MainWindow : Window
         if (JobsListBox.SelectedItem is string item)
         {
             PreviewCaptionText.Text = item;
+        }
+    }
+
+    private async void StartLocalPublisher_Click(object sender, RoutedEventArgs e)
+    {
+        if (_localPublisherCts is not null)
+        {
+            System.Windows.MessageBox.Show("محطة النشر تعمل بالفعل على هذا الجهاز.");
+            return;
+        }
+
+        try
+        {
+            var syncFolder = SyncFolderTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(syncFolder)) throw new InvalidOperationException("اختر مجلد المزامنة أولًا.");
+
+            var service = new SyncFolderService(syncFolder);
+            service.EnsureStructure();
+            await service.WriteAgentSettingsAsync(new AgentSettings
+            {
+                SyncFolder = syncFolder,
+                StopBeforeFinalPublishClick = true,
+                OpenPlatformsAutomatically = true,
+                KeepTikTokImageOnlyByDefault = true,
+                SnapchatImageOnly = true,
+                PreventSleepWhileRunning = true,
+                OpenPublishAssistantPage = true,
+                CopyInstagramCaptionToClipboard = true,
+                RequireManualDoneConfirmation = true
+            });
+
+            _localPublisherCts = new CancellationTokenSource();
+            var token = _localPublisherCts.Token;
+            LocalPublisherStatusText.Text = "محطة النشر: تعمل على هذا الجهاز. لا تطفئ الجهاز ولا تتركه يدخل Sleep.";
+            DashboardPublisherText.Text = "تعمل";
+
+            _localPublisherTask = Task.Run(async () =>
+            {
+                using var awake = new PowerAwakeService();
+                awake.KeepAwake();
+                var agent = new PublisherAgent(new SyncFolderService(syncFolder));
+                while (!token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var count = await agent.ProcessDueJobsAsync(token);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            LocalPublisherStatusText.Text = $"محطة النشر: تعمل — آخر فحص عالج {count} منشور — {DateTime.Now:HH:mm:ss}";
+                        });
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        await Dispatcher.InvokeAsync(() => LocalPublisherStatusText.Text = "محطة النشر: خطأ — " + ex.Message);
+                    }
+
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(30), token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+            }, token);
+        }
+        catch (Exception ex)
+        {
+            _localPublisherCts = null;
+            LocalPublisherStatusText.Text = "محطة النشر: متوقفة";
+            DashboardPublisherText.Text = "متوقفة";
+            System.Windows.MessageBox.Show(ex.Message, "خطأ تشغيل محطة النشر");
+        }
+    }
+
+    private void StopLocalPublisher_Click(object sender, RoutedEventArgs e)
+    {
+        _localPublisherCts?.Cancel();
+        _localPublisherCts = null;
+        LocalPublisherStatusText.Text = "محطة النشر: متوقفة";
+        DashboardPublisherText.Text = "متوقفة";
+    }
+
+    private async void RunLocalPublisherOnce_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var syncFolder = SyncFolderTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(syncFolder)) throw new InvalidOperationException("اختر مجلد المزامنة أولًا.");
+            var agent = new PublisherAgent(new SyncFolderService(syncFolder));
+            var count = await agent.ProcessDueJobsAsync();
+            LocalPublisherStatusText.Text = $"تم فحص المنشورات الآن. تمت معالجة {count} منشور.";
+            await RefreshStatusesAsync();
+            await RefreshHeartbeatAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(ex.Message, "خطأ");
         }
     }
 
@@ -240,10 +358,16 @@ public partial class MainWindow : Window
                 JobsListBox.Items.Add($"{job.ScheduledAt:yyyy-MM-dd HH:mm} — {job.Title} — {job.Status} — TikTok:{job.Publishing.TikTokMode}");
             }
             StatusText.Text = $"المجلد جاهز: {_syncFolder}";
+            SyncStateCardText.Text = "جاهزة";
+            SyncFolderShortText.Text = Path.GetFileName(_syncFolder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            TotalJobsCardText.Text = jobs.Count.ToString(CultureInfo.InvariantCulture);
+            PendingJobsCardText.Text = jobs.Count(j => !j.Status.Contains("done", StringComparison.OrdinalIgnoreCase)).ToString(CultureInfo.InvariantCulture);
         }
         catch (Exception ex)
         {
             StatusText.Text = "تعذر قراءة المجلد: " + ex.Message;
+            SyncStateCardText.Text = "مشكلة";
+            SyncFolderShortText.Text = "راجع المجلد";
         }
     }
 
@@ -257,6 +381,7 @@ public partial class MainWindow : Window
             foreach (var h in heartbeats)
                 HeartbeatListBox.Items.Add($"{h.Device} — {h.Mode} — {h.UpdatedAt:yyyy-MM-dd HH:mm:ss} — {h.LastMessage}");
             HeartbeatText.Text = heartbeats.Count == 0 ? "جهاز المحل: لا يوجد heartbeat" : $"آخر جهاز: {heartbeats[0].Device} قبل {(DateTimeOffset.Now - heartbeats[0].UpdatedAt).TotalMinutes:N0} دقيقة";
+            ShopDeviceCardText.Text = heartbeats.Count == 0 ? "غير متصل" : "متصل";
         }
         catch (Exception ex)
         {
@@ -271,6 +396,7 @@ public partial class MainWindow : Window
         StatusesListBox.Items.Clear();
         foreach (var status in statuses)
             StatusesListBox.Items.Add($"{status.UpdatedAt:yyyy-MM-dd HH:mm} — {status.JobId} — {status.Overall} — IG:{status.Instagram} TK:{status.TikTok} SC:{status.Snapchat}");
+        LastStatusCardText.Text = statuses.Count == 0 ? "لا يوجد" : $"{statuses[0].Overall} — {statuses[0].UpdatedAt:HH:mm}";
     }
 
 
@@ -328,10 +454,42 @@ public partial class MainWindow : Window
     private void ShowApproval(ApprovalResult result)
     {
         ApprovalListBox.Items.Clear();
+        ApprovalCenterMirrorListBox.Items.Clear();
         ApprovalListBox.Items.Add(result.Summary);
-        foreach (var issue in result.Issues) ApprovalListBox.Items.Add("❌ " + issue);
-        foreach (var warning in result.Warnings) ApprovalListBox.Items.Add("⚠️ " + warning);
-        if (result.Issues.Count == 0 && result.Warnings.Count == 0) ApprovalListBox.Items.Add("✅ لا توجد مشاكل");
+        ApprovalCenterMirrorListBox.Items.Add(result.Summary);
+        foreach (var issue in result.Issues)
+        {
+            ApprovalListBox.Items.Add("❌ " + issue);
+            ApprovalCenterMirrorListBox.Items.Add("❌ " + issue);
+        }
+        foreach (var warning in result.Warnings)
+        {
+            ApprovalListBox.Items.Add("⚠️ " + warning);
+            ApprovalCenterMirrorListBox.Items.Add("⚠️ " + warning);
+        }
+        if (result.Issues.Count == 0 && result.Warnings.Count == 0)
+        {
+            ApprovalListBox.Items.Add("✅ لا توجد مشاكل");
+            ApprovalCenterMirrorListBox.Items.Add("✅ لا توجد مشاكل");
+        }
+    }
+
+    private void ShowDashboard_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 0;
+    private void ShowOnboarding_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 8;
+    private void ShowPosts_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 1;
+    private void ShowBulk_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 2;
+    private void ShowApprovalCenter_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 3;
+    private void ShowPreview_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 4;
+    private void ShowDevice_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 5;
+    private void ShowArchive_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 6;
+    private void ShowSettings_Click(object sender, RoutedEventArgs e) => MainTabs.SelectedIndex = 7;
+
+    private void DeviceMode_Checked(object sender, RoutedEventArgs e) => UpdateDeviceModeBadge();
+
+    private void UpdateDeviceModeBadge()
+    {
+        if (DeviceModeBadgeText is null) return;
+        DeviceModeBadgeText.Text = PublisherModeRadio?.IsChecked == true ? "الوضع: جهاز المحل" : "الوضع: جهاز الإدارة";
     }
 
     private static DateTimeOffset ParseDateTime(DateTime? date, string timeText)
