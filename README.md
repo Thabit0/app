@@ -1,4 +1,4 @@
-# Dawish Content Studio Windows — No API v0.4
+# Dawish Content Studio Windows — No API v0.4.1
 
 برنامج ويندوز Native لإدارة محتوى الدويش بين جهازين بدون API.
 
@@ -9,7 +9,7 @@
 - الربط بين الجهازين: مجلد عادي داخل OneDrive / Google Drive / Syncthing / شبكة محلية.
 - لا يوجد Instagram API ولا TikTok API ولا Snapchat API.
 
-## أهم ما في v0.4
+## أهم ما في v0.4.1
 
 - Publisher Agent فعلي أكثر.
 - صفحة Publish Assistant لكل منشور.
@@ -47,3 +47,14 @@ DawishContentStudio.Agent.exe --sync "C:\Users\User\OneDrive\DawishSync" --mark-
 - Windows Release
 
 سيطلع لك Manager وAgent كملفات Windows.
+
+
+## v0.4.1 Build Fix
+
+تم إصلاح تعارض أسماء WPF/Windows Forms في ملفات Manager:
+- `App.xaml.cs`: استخدام `System.Windows.Application` صراحة.
+- `MainWindow.xaml.cs`: استخدام alias لعناصر WPF Controls.
+
+هذا يعالج أخطاء GitHub Actions:
+- `Application is an ambiguous reference`
+- `ComboBox is an ambiguous reference`

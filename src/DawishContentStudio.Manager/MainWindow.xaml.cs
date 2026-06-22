@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Windows;
-using System.Windows.Controls;
+using WpfControls = System.Windows.Controls;
 using DawishContentStudio.Core;
 using Microsoft.Win32;
 using WinForms = System.Windows.Forms;
@@ -341,9 +341,9 @@ public partial class MainWindow : Window
         return new DateTimeOffset(dateOnly.Add(time));
     }
 
-    private static TikTokPublishMode ReadTikTokMode(ComboBox combo)
+    private static TikTokPublishMode ReadTikTokMode(WpfControls.ComboBox combo)
     {
-        if (combo.SelectedItem is ComboBoxItem item && item.Tag is string tag && Enum.TryParse<TikTokPublishMode>(tag, out var mode)) return mode;
+        if (combo.SelectedItem is WpfControls.ComboBoxItem item && item.Tag is string tag && Enum.TryParse<TikTokPublishMode>(tag, out var mode)) return mode;
         return TikTokPublishMode.ImageOnly;
     }
 }
