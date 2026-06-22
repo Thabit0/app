@@ -6,7 +6,7 @@ public sealed class MedicalClaimsGuard
 {
     private static readonly string[] ArabicBlocked =
     [
-        "يعالج", "يشفي", "علاج", "دواء", "جرعة", "مفيد ل", "مفيد لـ", "يناسب مرضى",
+        "يعالج", "يشفي", "علاج", "دواء", "جرعة", "يناسب مرضى",
         "ضغط", "سكري", "سكر", "مناعة", "يقوي المناعة", "هضم", "قولون", "التهاب", "كحة",
         "بلغم", "معدة", "ينحف", "تخسيس", "ألم", "الم", "مسكن", "للمفاصل", "للصدر",
         "للجسم", "صحي", "طبي", "بديل", "للربو", "للحساسية", "للجيوب", "للصداع",
@@ -30,7 +30,7 @@ public sealed class MedicalClaimsGuard
 
             foreach (var word in ArabicBlocked.Concat(EnglishBlocked))
             {
-                if (normalized.Contains(Normalize(word), StringComparison.OrdinalIgnoreCase))
+                if (ContainsBlockedTerm(normalized, word))
                 {
                     hits.Add(word);
                 }
@@ -55,7 +55,7 @@ public sealed class MedicalClaimsGuard
 
         var result = text;
         foreach (var word in ArabicBlocked.Concat(EnglishBlocked))
-            result = result.Replace(word, "", StringComparison.OrdinalIgnoreCase);
+            result = RemoveBlockedTerm(result, word);
 
         result = Regex.Replace(result, @"(مفيد|ينفع|يستخدم|مناسب)\s+(ل|لل|مع)\s+\S+", "اختيار مميز", RegexOptions.IgnoreCase);
         result = Regex.Replace(result, @"(يساعد|يخفف|يقلل|يحسن)\s+\S+", "يضيف لمسة مميزة", RegexOptions.IgnoreCase);
@@ -65,6 +65,29 @@ public sealed class MedicalClaimsGuard
             result = $"اختيار مميز من {storeName}. جودة وتغليف يليق بذوقكم، متوفر الآن للطلب من الموقع.";
 
         return result;
+    }
+
+    private static bool ContainsBlockedTerm(string normalizedText, string blockedTerm)
+    {
+        var normalizedTerm = Normalize(blockedTerm);
+
+        if (normalizedTerm.Contains(' '))
+            return normalizedText.Contains(normalizedTerm, StringComparison.OrdinalIgnoreCase);
+
+        // Use word-like boundaries so short medical terms such as "ألم/الم" do not match
+        // safe marketing words such as "الموقع" or "المتجر".
+        var pattern = $@"(?<![\p{{L}}\p{{N}}]){Regex.Escape(normalizedTerm)}(?![\p{{L}}\p{{N}}])";
+        return Regex.IsMatch(normalizedText, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    }
+
+    private static string RemoveBlockedTerm(string text, string blockedTerm)
+    {
+        var normalizedTerm = Normalize(blockedTerm);
+        if (normalizedTerm.Contains(' '))
+            return text.Replace(blockedTerm, "", StringComparison.OrdinalIgnoreCase);
+
+        var pattern = $@"(?<![\p{{L}}\p{{N}}]){Regex.Escape(blockedTerm)}(?![\p{{L}}\p{{N}}])";
+        return Regex.Replace(text, pattern, "", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     }
 
     private static string Normalize(string input)

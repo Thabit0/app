@@ -62,3 +62,8 @@ DawishContentStudio.Agent.exe --sync "C:\Users\User\OneDrive\DawishSync" --mark-
 هذا يعالج أخطاء GitHub Actions:
 - `Application is an ambiguous reference`
 - `ComboBox is an ambiguous reference`
+
+
+## v0.4.4
+
+Fixes release tests by making the medical-claims guard avoid false positives on safe words such as `الموقع` while keeping strict blocking for real medical claims.
