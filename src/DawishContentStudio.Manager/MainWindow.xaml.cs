@@ -197,7 +197,7 @@ public partial class MainWindow : Window
         CaptionVariantsListBox.Items.Add("تسويقي: " + variants.Marketing);
     }
 
-    private void CaptionVariantsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void CaptionVariantsListBox_SelectionChanged(object sender, WpfControls.SelectionChangedEventArgs e)
     {
         if (CaptionVariantsListBox.SelectedItem is string text)
         {
@@ -207,7 +207,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void JobsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void JobsListBox_SelectionChanged(object sender, WpfControls.SelectionChangedEventArgs e)
     {
         if (JobsListBox.SelectedItem is string item)
         {
