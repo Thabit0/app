@@ -1,7 +1,0 @@
-param(
-  [Parameter(Mandatory=$true)][string]$JobId,
-  [string]$Sync = "$env:USERPROFILE\OneDrive\DawishSync"
-)
-$agent = Join-Path $PSScriptRoot "..\release\Agent\DawishContentStudio.Agent.exe"
-if (!(Test-Path $agent)) { $agent = "DawishContentStudio.Agent.exe" }
-& $agent --sync $Sync --mark-done $JobId
