@@ -1,0 +1,50 @@
+name: Build Program
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore DawishContentStudio.sln
+
+      - name: Build
+        run: dotnet build DawishContentStudio.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test DawishContentStudio.sln --configuration Release --no-build
+
+      - name: Publish App
+        run: dotnet publish src/DawishContentStudio.Manager/DawishContentStudio.Manager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/DawishContentStudio
+
+      - name: Copy README and Worker
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path publish/cloudflare | Out-Null
+          Copy-Item README.md publish/README.md -Force
+          Copy-Item cloudflare/*.js publish/cloudflare/ -Force
+
+      - name: Zip program
+        shell: pwsh
+        run: Compress-Archive -Path publish/* -DestinationPath DawishContentStudio-v0.8.5-Simple.zip -Force
+
+      - name: Upload program
+        uses: actions/upload-artifact@v4
+        with:
+          name: DawishContentStudio-v0.8.5-Simple
+          path: DawishContentStudio-v0.8.5-Simple.zip
