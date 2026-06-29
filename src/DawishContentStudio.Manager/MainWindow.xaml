@@ -1,0 +1,305 @@
+<Window x:Class="DawishContentStudio.Manager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dawish Content Studio v0.8.5" Height="820" Width="1220"
+        FlowDirection="RightToLeft" WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Bg}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="240"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="1" Background="{StaticResource Dark}" CornerRadius="28" Margin="14" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="Dawish" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Content Studio" Foreground="#F4D8A8" FontSize="15" HorizontalAlignment="Center"/>
+                    <Border Background="#F5E5BF" CornerRadius="16" Padding="10" Margin="0,18,0,0">
+                        <TextBlock x:Name="RoleBadgeText" Text="اختر وضع الجهاز" Foreground="#1F2A20" FontWeight="Bold" TextAlignment="Center" TextWrapping="Wrap"/>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Margin="0,28,0,0">
+                    <TextBlock Text="القائمة" Foreground="#F4D8A8" FontWeight="Bold" Margin="4,0,0,8"/>
+                    <Button x:Name="NavStart" Style="{StaticResource NavButton}" Content="الدخول" Click="ShowStart_Click"/>
+                    <Button x:Name="NavPosts" Style="{StaticResource NavButton}" Content="أرفع وجدول" Click="ShowPosts_Click"/>
+                    <Button x:Name="NavQueue" Style="{StaticResource NavButton}" Content="جهاز المحل" Click="ShowShop_Click"/>
+                    <Button x:Name="NavDashboard" Visibility="Collapsed" Content="الحالة" Click="ShowDashboard_Click"/>
+                    <Button x:Name="NavSettings" Visibility="Collapsed" Content="الإعدادات" Click="ShowSettings_Click"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2">
+                    <Separator Background="#536154" Margin="0,8"/>
+                    <TextBlock x:Name="ConnectionStatusText" Text="Cloudflare غير مفحوص" Foreground="White" FontWeight="Bold" TextWrapping="Wrap"/>
+                    <TextBlock Text="بدون درايف. بدون API للمنصات." Foreground="#D9E1D6" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="0" Margin="14,14,0,14">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Background="{StaticResource Panel}" CornerRadius="24" Padding="16" BorderBrush="{StaticResource Border}" BorderThickness="1" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Dawish Content Studio" FontSize="30" FontWeight="Bold"/>
+                        <TextBlock Text="ثلاث شاشات فقط: دخول، أرفع وجدول، جهاز المحل." Foreground="{StaticResource Muted}" FontSize="15" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+                        <Button Content="فحص الاتصال" Click="TestConnection_Click"/>
+                        <Button Style="{StaticResource PrimaryButton}" Content="تحديث" Click="Refresh_Click"/>
+                    </WrapPanel>
+                </Grid>
+            </Border>
+
+            <TabControl x:Name="MainTabs" Grid.Row="1" BorderThickness="0" Background="Transparent" SelectedIndex="0">
+                <TabControl.ItemContainerStyle>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Height" Value="0"/>
+                        <Setter Property="Width" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+                </TabControl.ItemContainerStyle>
+
+                <TabItem Header="Start">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <Border Style="{StaticResource Card}" Background="#FFF8EA">
+                                <StackPanel>
+                                    <TextBlock Text="ادخل مرة واحدة" FontSize="30" FontWeight="Bold"/>
+                                    <TextBlock Text="اختر الجهاز، ثم اكتب رابط Cloudflare والرمز. بعدها ما تحتاج ترجع هنا إلا إذا غيرت الرمز." Foreground="{StaticResource Muted}" FontSize="16" Margin="0,6,0,16" TextWrapping="Wrap"/>
+
+                                    <UniformGrid Columns="2">
+                                        <Border Style="{StaticResource Card}">
+                                            <StackPanel>
+                                                <TextBlock Text="أنا المدير" FontSize="25" FontWeight="Bold"/>
+                                                <TextBlock Text="أرفع الصور وأحدد الكابشن والوقت." TextWrapping="Wrap" Foreground="{StaticResource Muted}" Margin="0,8,0,12"/>
+                                                <Button Style="{StaticResource PrimaryButton}" Content="اختيار المدير" Click="SetAdminRole_Click"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Style="{StaticResource Card}">
+                                            <StackPanel>
+                                                <TextBlock Text="جهاز المحل" FontSize="25" FontWeight="Bold"/>
+                                                <TextBlock Text="الجهاز الموجود بالمحل، والحسابات مسجلة فيه." TextWrapping="Wrap" Foreground="{StaticResource Muted}" Margin="0,8,0,12"/>
+                                                <Button Style="{StaticResource PrimaryButton}" Content="اختيار جهاز المحل" Click="SetShopRole_Click"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource Card}">
+                                <StackPanel>
+                                    <TextBlock Text="Cloudflare" FontSize="24" FontWeight="Bold"/>
+                                    <TextBlock Style="{StaticResource SmallLabel}" Text="Worker URL"/>
+                                    <TextBox x:Name="WorkerUrlTextBox" Text="https://dawish-content-api.thabit1919.workers.dev" FlowDirection="LeftToRight" TextAlignment="Left"/>
+                                    <TextBlock Style="{StaticResource SmallLabel}" Text="الرمز"/>
+                                    <PasswordBox x:Name="TokenPasswordBox" FlowDirection="LeftToRight"/>
+                                    <WrapPanel>
+                                        <Button Style="{StaticResource PrimaryButton}" Content="حفظ وفحص" Click="TestConnection_Click"/>
+                                        <Button Content="حفظ فقط" Click="SaveSettings_Click"/>
+                                    </WrapPanel>
+                                    <TextBlock Text="استخدم ADMIN_TOKEN في جهازك، وSHOP_TOKEN في جهاز المحل." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem Header="Dashboard">
+                    <Grid Visibility="Collapsed">
+                        <TextBlock x:Name="CloudStatusCardText" Text="غير مفحوص"/>
+                        <TextBlock x:Name="ShopStatusCardText" Text="غير معروف"/>
+                        <TextBlock x:Name="UpcomingCardText" Text="0"/>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Posts">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="320"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource Card}">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top">
+                                    <TextBlock Text="الصور" FontSize="28" FontWeight="Bold"/>
+                                    <TextBlock Text="اختر صورة أو أكثر. كل صورة تصير منشور مستقل." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,10"/>
+                                    <Button Style="{StaticResource PrimaryButton}" Content="+ اختر الصور" Click="ChooseImages_Click" FontSize="18" Padding="18,13"/>
+                                    <Button Content="رفع وجدولة كل الصور" Click="ScheduleAllImages_Click" FontSize="16" Padding="18,12"/>
+                                </StackPanel>
+                                <ListBox x:Name="ImagesListBox" SelectionChanged="ImagesListBox_SelectionChanged" Margin="0,12,0,0" FontSize="15"/>
+                            </DockPanel>
+                        </Border>
+
+                        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <Border Style="{StaticResource Card}" Background="#FFF8EA">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="260"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Background="#F6EFE1" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="18" Padding="10" Margin="0,0,14,0">
+                                            <Grid Height="230">
+                                                <Image x:Name="SelectedImagePreview" Stretch="Uniform"/>
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="الكابشن" FontSize="26" FontWeight="Bold"/>
+                                            <TextBox x:Name="CaptionTextBox" AcceptsReturn="True" Height="150" TextChanged="PostFields_Changed" Text="متوفر الآن في عطارة الدويش." FontSize="17"/>
+                                            <TextBlock Text="لا تكتب ادعاءات طبية: يعالج، يشفي، مناعة، ضغط، سكر، جرعة." Foreground="#9A4B3F" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}">
+                                    <StackPanel>
+                                        <TextBlock Text="وين ينزل؟" FontSize="24" FontWeight="Bold"/>
+                                        <UniformGrid Columns="3" Margin="0,8,0,6">
+                                            <CheckBox x:Name="InstagramCheckBox" Content="Instagram" IsChecked="True" Checked="PostFields_Changed" Unchecked="PostFields_Changed" FontSize="17"/>
+                                            <CheckBox x:Name="TikTokCheckBox" Content="TikTok" IsChecked="True" Checked="PostFields_Changed" Unchecked="PostFields_Changed" FontSize="17"/>
+                                            <CheckBox x:Name="SnapchatCheckBox" Content="Snapchat" IsChecked="False" Checked="PostFields_Changed" Unchecked="PostFields_Changed" FontSize="17"/>
+                                        </UniformGrid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                <TextBlock Style="{StaticResource SmallLabel}" Text="لوكيشن Instagram"/>
+                                                <TextBox x:Name="InstagramLocationTextBox" Text="مدينة الزلفي" TextChanged="PostFields_Changed"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="8,0,8,0">
+                                                <TextBlock Style="{StaticResource SmallLabel}" Text="لوكيشن TikTok"/>
+                                                <TextBox x:Name="TikTokLocationTextBox" Text="عطارة الدويش" TextChanged="PostFields_Changed"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Margin="8,0,0,0">
+                                                <TextBlock Style="{StaticResource SmallLabel}" Text="لوكيشن Snapchat"/>
+                                                <TextBox x:Name="SnapchatLocationTextBox" Text="" TextChanged="PostFields_Changed"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="متى ينزل؟" FontSize="24" FontWeight="Bold"/>
+                                            <WrapPanel Margin="0,8,0,0">
+                                                <DatePicker x:Name="ScheduleDatePicker" SelectedDateChanged="PostFields_Changed" Width="155"/>
+                                                <ComboBox x:Name="HourComboBox" SelectionChanged="PostFields_Changed" Width="80"/>
+                                                <ComboBox x:Name="MinuteComboBox" SelectionChanged="PostFields_Changed" Width="80"/>
+                                                <ComboBox x:Name="AmPmComboBox" SelectionChanged="PostFields_Changed" Width="80">
+                                                    <ComboBoxItem Content="ص"/>
+                                                    <ComboBoxItem Content="م" IsSelected="True"/>
+                                                </ComboBox>
+                                            </WrapPanel>
+                                            <TextBlock Style="{StaticResource SmallLabel}" Text="الفاصل بين الصور لو رفعت أكثر من صورة"/>
+                                            <ComboBox x:Name="SpacingMinutesComboBox" Width="150" HorizontalAlignment="Right">
+                                                <ComboBoxItem Content="30"/>
+                                                <ComboBoxItem Content="60" IsSelected="True"/>
+                                                <ComboBoxItem Content="120"/>
+                                                <ComboBoxItem Content="1440"/>
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Width="260">
+                                            <Button Style="{StaticResource PrimaryButton}" Content="رفع وجدولة هذه الصورة" Click="ScheduleSelectedImage_Click" FontSize="17" Padding="18,13"/>
+                                            <Button x:Name="ApplyToAllButton" Visibility="Collapsed" Content="نفس البيانات لكل الصور" Click="ApplyToAllImages_Click"/>
+                                            <Button Content="رفع وجدولة كل الصور" Click="ScheduleAllImages_Click" FontSize="16" Padding="18,12"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Border Style="{StaticResource Card}" Background="{StaticResource Dark}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="220"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Background="#F0F0F0" CornerRadius="16" Height="190" Margin="0,0,14,0">
+                                            <Grid>
+                                                <Image x:Name="PhoneImagePreview" Stretch="Uniform"/>
+                                                <TextBlock x:Name="EmptyImageText" Text="الصورة" Foreground="#888" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="المعاينة" Foreground="White" FontSize="23" FontWeight="Bold"/>
+                                            <TextBlock x:Name="PreviewPlatformText" Text="Instagram / TikTok" Foreground="#F4D8A8" FontWeight="Bold" Margin="0,8,0,0"/>
+                                            <TextBlock x:Name="PreviewCaptionText" Text="الكابشن يظهر هنا" Foreground="White" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                            <TextBlock x:Name="PreviewLocationText" Text="اللوكيشن" Foreground="#F4D8A8" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                            <TextBlock x:Name="UploadStatusText" Text="" Foreground="White" TextWrapping="Wrap" Margin="0,10,0,0" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Shop">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource Card}" Background="#FFF8EA">
+                            <StackPanel>
+                                <TextBlock Text="جهاز المحل" FontSize="30" FontWeight="Bold"/>
+                                <TextBlock Text="افتحها في جهاز المحل، وحط SHOP_TOKEN، واترك البرنامج شغال." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,14" FontSize="17"/>
+                                <Button Style="{StaticResource PrimaryButton}" Content="تشغيل محطة المحل" Click="StartShopStation_Click" FontSize="19" Padding="22,16"/>
+                                <WrapPanel>
+                                    <Button Style="{StaticResource DangerButton}" Content="إيقاف" Click="StopShopStation_Click"/>
+                                    <Button Content="فحص الآن" Click="RunShopOnce_Click"/>
+                                </WrapPanel>
+                                <TextBlock x:Name="ShopStationText" Text="محطة المحل متوقفة" FontSize="18" FontWeight="Bold" Margin="0,12,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource Card}">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top">
+                                    <TextBlock Text="المنشورات الجاهزة للنشر" FontSize="26" FontWeight="Bold"/>
+                                    <TextBlock Text="إذا جاء الوقت، البرنامج يفتح صفحة مساعدة فيها الصورة والكابشن." Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,8"/>
+                                    <Button Content="تحديث" Click="RefreshDuePosts_Click"/>
+                                </StackPanel>
+                                <ListBox x:Name="DuePostsListBox" Margin="0,12,0,0" FontSize="15"/>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Settings">
+                    <Grid Visibility="Collapsed">
+                        <TextBox x:Name="SettingsWorkerUrlTextBox"/>
+                        <PasswordBox x:Name="SettingsTokenPasswordBox"/>
+                        <ComboBox x:Name="RoleComboBox">
+                            <ComboBoxItem Content="أنا المدير" Tag="admin"/>
+                            <ComboBoxItem Content="هذا جهاز المحل" Tag="shop"/>
+                        </ComboBox>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</Window>
