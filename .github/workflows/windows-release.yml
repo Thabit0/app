@@ -1,10 +1,6 @@
-name: Build Program
+name: Dawish v2 Windows Release
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
   workflow_dispatch:
 
 jobs:
