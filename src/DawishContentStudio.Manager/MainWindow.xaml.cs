@@ -149,10 +149,47 @@ public partial class MainWindow : Window
             .ToArray();
 
         Images.Clear();
-        foreach (var file in files)
-            Images.Add(new LocalImageItem { Path = file, FileName = Path.GetFileName(file) });
+        ImageWorkspaceService.AddUnique(Images, files);
         UpdateProgress();
         ManagerStatusText.Text = files.Length == 0 ? "لم أجد صورًا داخل المجلد." : $"تم استيراد {files.Length} صورة. كل صورة منشور مستقل.";
+    }
+
+    private void AddImages_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "اختر الصور التي تريد إضافتها",
+            Filter = "ملفات الصور|*.jpg;*.jpeg;*.png;*.webp|كل الملفات|*.*",
+            Multiselect = true
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        var added = ImageWorkspaceService.AddUnique(Images, dialog.FileNames);
+        UpdateProgress();
+        ManagerStatusText.Text = added == 0
+            ? "الصور المحددة موجودة مسبقًا أو غير مدعومة."
+            : $"تمت إضافة {added} صورة جديدة. العدد الإجمالي: {Images.Count}.";
+    }
+
+    private void DeleteSelected_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = Images.Count(x => x.IsSelected);
+        if (selected == 0)
+        {
+            MessageBox.Show("حدد الصور التي تريد حذفها أولًا.");
+            return;
+        }
+
+        var confirmation = MessageBox.Show(
+            $"حذف {selected} صورة من جلسة العمل؟ لن تُحذف الملفات الأصلية من جهازك.",
+            "تأكيد الحذف",
+            MessageBoxButton.OKCancel,
+            MessageBoxImage.Warning);
+        if (confirmation != MessageBoxResult.OK) return;
+
+        ImageWorkspaceService.RemoveSelected(Images);
+        UpdateProgress();
+        ManagerStatusText.Text = $"تم حذف {selected} صورة من جلسة العمل. الملفات الأصلية ما زالت محفوظة.";
     }
 
     private void SelectAll_Click(object sender, RoutedEventArgs e)
@@ -278,6 +315,7 @@ public partial class MainWindow : Window
         if (RootTabs.SelectedIndex != 2) return;
         if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.A) { SelectAll_Click(sender, e); e.Handled = true; }
         else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.O) { ChooseFolder_Click(sender, e); e.Handled = true; }
+        else if (e.Key == Key.Delete) { DeleteSelected_Click(sender, e); e.Handled = true; }
     }
 
     private void OpenInstagram_Click(object sender, RoutedEventArgs e) => OpenUrl("https://www.instagram.com/accounts/login/");

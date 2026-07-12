@@ -68,6 +68,8 @@
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Button Style="{StaticResource PrimaryButton}" Content="📁 استيراد مجلد" Click="ChooseFolder_Click"/>
+                                <Button Content="＋ إضافة صور" Click="AddImages_Click"/>
+                                <Button Content="🗑 حذف المحدد" Click="DeleteSelected_Click"/>
                                 <Button Content="☑ تحديد الكل" Click="SelectAll_Click"/>
                                 <Button Content="○ تحديد غير المجدول" Click="SelectUnscheduled_Click"/>
                                 <Button Content="إلغاء التحديد" Click="ClearSelection_Click"/>

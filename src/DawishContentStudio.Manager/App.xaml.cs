@@ -9,6 +9,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        DesktopShortcutService.TryCreate();
         DispatcherUnhandledException += (_, args) =>
         {
             WriteCrash(args.Exception);
