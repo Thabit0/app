@@ -1,0 +1,20 @@
+name = "dawish-content-api"
+main = "worker.js"
+compatibility_date = "2026-07-12"
+account_id = "383baec144ee40a9599d7e4c6b1195a3"
+preview_urls = false
+
+[observability]
+enabled = true
+
+[triggers]
+crons = ["0 3 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dawish_content_db"
+database_id = "88984ed0-9879-47d1-ac72-eb2e3c86c8d7"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "dawish-content-media"
