@@ -1,0 +1,8 @@
+{
+  "name": "dawish-content-studio-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:worker": "node --test cloudflare/worker.test.mjs"
+  }
+}

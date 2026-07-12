@@ -43,16 +43,38 @@ public sealed class CloudflareClientTests
         }
     }
 
+    [Fact]
+    public async Task ClaimUsesDeviceIdentityAndExpectedEndpoint()
+    {
+        var handler = new CaptureHandler
+        {
+            ResponseJson = "{\"ok\":true,\"postId\":\"post-1\",\"deviceId\":\"shop-pc\",\"claimedAt\":\"2026-07-12T00:00:00Z\",\"expiresAt\":\"2026-07-12T00:15:00Z\"}"
+        };
+        using var http = new HttpClient(handler);
+        var client = new CloudflareClient("https://example.test", "token", http);
+
+        var result = await client.ClaimPostAsync("post-1", "shop-pc");
+
+        Assert.True(result.Ok);
+        Assert.Equal("/v1/shop/claim", handler.RequestUri?.AbsolutePath);
+        Assert.Contains("\"deviceId\":\"shop-pc\"", handler.RequestBody);
+    }
+
     private sealed class CaptureHandler : HttpMessageHandler
     {
         public string? MultipartBody { get; private set; }
+        public string? RequestBody { get; private set; }
+        public Uri? RequestUri { get; private set; }
+        public string ResponseJson { get; set; } = "{\"id\":\"post-1\",\"mediaKey\":\"posts/post-1/image.png\",\"message\":\"ok\"}";
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            MultipartBody = Encoding.UTF8.GetString(await request.Content!.ReadAsByteArrayAsync(cancellationToken));
+            RequestUri = request.RequestUri;
+            RequestBody = request.Content is null ? "" : await request.Content.ReadAsStringAsync(cancellationToken);
+            if (request.Content is MultipartFormDataContent) MultipartBody = RequestBody;
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent("{\"id\":\"post-1\",\"mediaKey\":\"posts/post-1/image.png\",\"message\":\"ok\"}")
+                Content = new StringContent(ResponseJson)
             };
         }
     }

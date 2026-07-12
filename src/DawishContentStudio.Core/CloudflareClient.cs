@@ -71,6 +71,37 @@ public sealed class CloudflareClient
         return await ReadJsonAsync<List<CloudflarePost>>(response);
     }
 
+    public async Task<ClaimResponse> ClaimPostAsync(string postId, string deviceId)
+    {
+        using var request = Create(HttpMethod.Post, "/v1/shop/claim");
+        request.Content = JsonContent.Create(new { postId, deviceId });
+        using var response = await _http.SendAsync(request);
+        return await ReadJsonAsync<ClaimResponse>(response);
+    }
+
+    public async Task<OperationResponse> CancelPostAsync(string postId)
+    {
+        using var request = Create(HttpMethod.Post, $"/v1/admin/posts/{Uri.EscapeDataString(postId)}/cancel");
+        request.Content = JsonContent.Create(new { });
+        using var response = await _http.SendAsync(request);
+        return await ReadJsonAsync<OperationResponse>(response);
+    }
+
+    public async Task<OperationResponse> ReschedulePostAsync(string postId, DateTimeOffset scheduledAt)
+    {
+        using var request = Create(HttpMethod.Post, $"/v1/admin/posts/{Uri.EscapeDataString(postId)}/reschedule");
+        request.Content = JsonContent.Create(new { scheduledAt = scheduledAt.ToUniversalTime().ToString("O") });
+        using var response = await _http.SendAsync(request);
+        return await ReadJsonAsync<OperationResponse>(response);
+    }
+
+    public async Task<List<PostEvent>> GetPostEventsAsync(string postId)
+    {
+        using var request = Create(HttpMethod.Get, $"/v1/admin/posts/{Uri.EscapeDataString(postId)}/events");
+        using var response = await _http.SendAsync(request);
+        return await ReadJsonAsync<List<PostEvent>>(response);
+    }
+
     public async Task HeartbeatAsync(string deviceName, string mode)
     {
         using var request = Create(HttpMethod.Post, "/v1/shop/heartbeat");
@@ -90,10 +121,10 @@ public sealed class CloudflareClient
         await input.CopyToAsync(output);
     }
 
-    public async Task ReportResultAsync(string postId, string status, string message)
+    public async Task ReportResultAsync(string postId, string platform, string status, string message, string deviceId)
     {
-        using var request = Create(HttpMethod.Post, $"/v1/shop/posts/{Uri.EscapeDataString(postId)}/result");
-        request.Content = JsonContent.Create(new { platform = "all", status, message });
+        using var request = Create(HttpMethod.Post, $"/v1/shop/posts/{Uri.EscapeDataString(postId)}/platform-result");
+        request.Content = JsonContent.Create(new { platform, status, message, deviceId });
         using var response = await _http.SendAsync(request);
         await EnsureSuccessAsync(response);
     }

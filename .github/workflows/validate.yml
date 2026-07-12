@@ -29,6 +29,9 @@ jobs:
       - name: Test
         run: dotnet test DawishContentStudio.sln --configuration Release --no-build
 
+      - name: Test Cloudflare Worker
+        run: node --test cloudflare/worker.test.mjs
+
       - name: Publish App
         run: dotnet publish src/DawishContentStudio.Manager/DawishContentStudio.Manager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/DawishContentStudio
 

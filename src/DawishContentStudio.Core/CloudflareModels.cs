@@ -88,9 +88,36 @@ public sealed class CloudflarePost
     [JsonPropertyName("snapchatLocation")] public string? SnapchatLocation { get; set; }
     [JsonPropertyName("scheduledAt")] public DateTime ScheduledAt { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = "scheduled";
+    [JsonPropertyName("platformStates")] public Dictionary<string, string> PlatformStates { get; set; } = [];
     [JsonPropertyName("tiktokMode")] public string TikTokMode { get; set; } = "image_only";
     [JsonPropertyName("snapchatMode")] public string SnapchatMode { get; set; } = "image_only";
     [JsonPropertyName("mediaKey")] public string MediaKey { get; set; } = "";
+}
+
+public sealed class ClaimResponse
+{
+    [JsonPropertyName("ok")] public bool Ok { get; set; }
+    [JsonPropertyName("postId")] public string PostId { get; set; } = "";
+    [JsonPropertyName("deviceId")] public string DeviceId { get; set; } = "";
+    [JsonPropertyName("claimedAt")] public DateTimeOffset ClaimedAt { get; set; }
+    [JsonPropertyName("expiresAt")] public DateTimeOffset ExpiresAt { get; set; }
+}
+
+public sealed class PostEvent
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("post_id")] public string PostId { get; set; } = "";
+    [JsonPropertyName("device_id")] public string DeviceId { get; set; } = "";
+    [JsonPropertyName("event_type")] public string EventType { get; set; } = "";
+    [JsonPropertyName("message")] public string Message { get; set; } = "";
+    [JsonPropertyName("created_at")] public DateTimeOffset CreatedAt { get; set; }
+}
+
+public sealed class OperationResponse
+{
+    [JsonPropertyName("ok")] public bool Ok { get; set; }
+    [JsonPropertyName("postId")] public string PostId { get; set; } = "";
+    [JsonPropertyName("status")] public string Status { get; set; } = "";
 }
 
 public sealed class UploadPostResponse
