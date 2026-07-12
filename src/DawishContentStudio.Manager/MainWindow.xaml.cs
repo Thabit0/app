@@ -19,6 +19,7 @@ public partial class MainWindow : Window
 
     private readonly AppSettingsStore _settingsStore = new();
     private readonly ShopInboxService _shopInbox = new();
+    private readonly PersistentBrowserSession _publishingBrowser = new();
     private AppSettings _settings;
     private CancellationTokenSource? _shopCts;
 
@@ -319,9 +320,23 @@ public partial class MainWindow : Window
         else if (e.Key == Key.Delete) { DeleteSelected_Click(sender, e); e.Handled = true; }
     }
 
-    private void OpenInstagram_Click(object sender, RoutedEventArgs e) => OpenUrl("https://www.instagram.com/accounts/login/");
-    private void OpenTikTok_Click(object sender, RoutedEventArgs e) => OpenUrl("https://www.tiktok.com/login");
-    private void OpenSnapchat_Click(object sender, RoutedEventArgs e) => OpenUrl("https://web.snapchat.com/");
+    private async void OpenInstagram_Click(object sender, RoutedEventArgs e) => await OpenPublishingAccountAsync("https://www.instagram.com/accounts/login/");
+    private async void OpenTikTok_Click(object sender, RoutedEventArgs e) => await OpenPublishingAccountAsync("https://www.tiktok.com/login");
+    private async void OpenSnapchat_Click(object sender, RoutedEventArgs e) => await OpenPublishingAccountAsync("https://web.snapchat.com/");
+
+    private async Task OpenPublishingAccountAsync(string url)
+    {
+        try
+        {
+            AccountsStatusText.Text = "جاري فتح متصفح النشر الآمن...";
+            await _publishingBrowser.OpenAsync(url);
+            AccountsStatusText.Text = "سجّل الدخول مرة واحدة؛ سيحتفظ جهاز المحل بهذه الجلسة محليًا.";
+        }
+        catch (Exception ex)
+        {
+            AccountsStatusText.Text = "تعذر فتح متصفح النشر: " + ex.Message;
+        }
+    }
 
     private void TestAccounts_Click(object sender, RoutedEventArgs e)
     {
@@ -439,4 +454,11 @@ public partial class MainWindow : Window
     }
 
     private static string FormatDateTime(DateTime value) => value.ToString("dd/MM/yyyy hh:mm tt").Replace("AM", "ص").Replace("PM", "م");
+
+    protected override async void OnClosed(EventArgs e)
+    {
+        _shopCts?.Cancel();
+        await _publishingBrowser.DisposeAsync();
+        base.OnClosed(e);
+    }
 }
