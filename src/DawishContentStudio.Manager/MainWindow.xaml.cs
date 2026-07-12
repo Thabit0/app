@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private static readonly string[] ImageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
 
     private readonly AppSettingsStore _settingsStore = new();
+    private readonly ShopInboxService _shopInbox = new();
     private AppSettings _settings;
     private CancellationTokenSource? _shopCts;
 
@@ -114,7 +115,7 @@ public partial class MainWindow : Window
         else
         {
             RootTabs.SelectedIndex = 3;
-            _ = RefreshDuePostsAsync();
+            StartShopStation();
         }
     }
 
@@ -355,9 +356,14 @@ public partial class MainWindow : Window
 
     private void StartShopStation_Click(object sender, RoutedEventArgs e)
     {
+        StartShopStation();
+    }
+
+    private void StartShopStation()
+    {
         if (_shopCts is not null) return;
         _shopCts = new CancellationTokenSource();
-        ShopStationText.Text = "تعمل — فحص كل 45 ثانية";
+        ShopStationText.Text = "تعمل — نقل تلقائي وفحص كل 45 ثانية";
         _ = ShopLoopAsync(_shopCts.Token);
     }
 
@@ -375,6 +381,7 @@ public partial class MainWindow : Window
             try
             {
                 await Client().HeartbeatAsync(Environment.MachineName, "shop");
+                await DownloadQueuedPostsAsync(token);
                 await RefreshDuePostsAsync();
                 await Task.Delay(TimeSpan.FromSeconds(45), token);
             }
@@ -385,6 +392,27 @@ public partial class MainWindow : Window
                 await Task.Delay(TimeSpan.FromSeconds(45), token);
             }
         }
+    }
+
+    private async Task DownloadQueuedPostsAsync(CancellationToken token)
+    {
+        var client = Client();
+        var posts = await client.GetQueuePostsAsync();
+        var downloaded = 0;
+        foreach (var post in posts)
+        {
+            token.ThrowIfCancellationRequested();
+            if (_shopInbox.Contains(post.Id)) continue;
+            await _shopInbox.DownloadAsync(
+                post,
+                path => client.DownloadMediaAsync(post.MediaKey, path),
+                token);
+            downloaded++;
+        }
+
+        ShopStationText.Text = downloaded > 0
+            ? $"تعمل — تم نقل {downloaded} صورة جديدة، الجاهز محليًا: {_shopInbox.CountReady()}"
+            : $"تعمل — الصور الجاهزة محليًا: {_shopInbox.CountReady()}";
     }
 
     private static string HashPin(string pin) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(pin))).ToLowerInvariant();

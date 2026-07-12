@@ -41,6 +41,7 @@ export default {
       }
 
       if (url.pathname === '/v1/shop/due' && request.method === 'GET') return duePosts(env);
+      if (url.pathname === '/v1/shop/queue' && request.method === 'GET') return queuedPosts(env);
       if (url.pathname === '/v1/shop/claim' && request.method === 'POST') return claimPost(request, env);
       if (url.pathname === '/v1/shop/heartbeat' && request.method === 'POST') return heartbeat(request, env);
 
@@ -224,6 +225,17 @@ async function duePosts(env) {
       AND pp.status IN ('scheduled', 'retry')
       AND (pc.post_id IS NULL OR pc.expires_at <= ?)
     GROUP BY p.id ORDER BY p.scheduled_at ASC LIMIT 20`).bind(now, now).all();
+  return json(results.map(rowToPost));
+}
+
+async function queuedPosts(env) {
+  const { results } = await env.DB.prepare(`SELECT p.*,
+    GROUP_CONCAT(pp.platform || ':' || pp.status) AS platform_states
+    FROM posts p
+    JOIN post_platforms pp ON pp.post_id = p.id
+    WHERE p.status NOT IN ('published', 'cancelled')
+      AND pp.status IN ('scheduled', 'retry', 'awaiting_confirmation')
+    GROUP BY p.id ORDER BY p.scheduled_at ASC LIMIT 500`).all();
   return json(results.map(rowToPost));
 }
 

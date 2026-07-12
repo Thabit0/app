@@ -71,6 +71,13 @@ public sealed class CloudflareClient
         return await ReadJsonAsync<List<CloudflarePost>>(response);
     }
 
+    public async Task<List<CloudflarePost>> GetQueuePostsAsync()
+    {
+        using var request = Create(HttpMethod.Get, "/v1/shop/queue");
+        using var response = await _http.SendAsync(request);
+        return await ReadJsonAsync<List<CloudflarePost>>(response);
+    }
+
     public async Task<ClaimResponse> ClaimPostAsync(string postId, string deviceId)
     {
         using var request = Create(HttpMethod.Post, "/v1/shop/claim");

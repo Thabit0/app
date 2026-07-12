@@ -60,6 +60,19 @@ public sealed class CloudflareClientTests
         Assert.Contains("\"deviceId\":\"shop-pc\"", handler.RequestBody);
     }
 
+    [Fact]
+    public async Task QueueUsesShopPrefetchEndpoint()
+    {
+        var handler = new CaptureHandler { ResponseJson = "[]" };
+        using var http = new HttpClient(handler);
+        var client = new CloudflareClient("https://example.test", "token", http);
+
+        var result = await client.GetQueuePostsAsync();
+
+        Assert.Empty(result);
+        Assert.Equal("/v1/shop/queue", handler.RequestUri?.AbsolutePath);
+    }
+
     private sealed class CaptureHandler : HttpMessageHandler
     {
         public string? MultipartBody { get; private set; }
